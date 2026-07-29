@@ -34,7 +34,7 @@ export function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ["adminStatus"] });
     },
     onError: (err) => {
-      toast.error(`设置保存失败: ${err}`, { duration: Infinity });
+      toast.error(`Failed to save settings: ${err}`, { duration: Infinity });
     },
   });
 

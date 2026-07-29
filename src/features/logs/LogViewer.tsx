@@ -83,7 +83,7 @@ export function LogViewer() {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // 过滤条件变化时滚到顶部，避免中间位置出现“无显示”错觉
+  // Scroll to top when filter changes to avoid "nothing visible" illusion
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [errorsOnly]);

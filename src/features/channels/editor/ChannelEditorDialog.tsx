@@ -29,7 +29,7 @@ type EditorModelInfo = ModelInfo & {
   temporary?: boolean;
 };
 
-/** Header 注入控制组件 */
+/** Header injection control component */
 const HeaderInjectionControl: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -40,7 +40,7 @@ const HeaderInjectionControl: React.FC<{
   const [jsonText, setJsonText] = useState(value);
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // 预设模板
+  // Preset templates
   const templates = {
     claude: JSON.stringify({
       "user-agent": "claude-cli/2.1.176 (external, cli)",
@@ -52,7 +52,7 @@ const HeaderInjectionControl: React.FC<{
     }, null, 2)
   };
 
-  // 验证 JSON
+  // Validate JSON
   const validateJson = (text: string): boolean => {
     if (!text.trim()) {
       setJsonError(null);
@@ -61,22 +61,22 @@ const HeaderInjectionControl: React.FC<{
     try {
       const parsed = JSON.parse(text);
       if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-        setJsonError('必须是 JSON 对象');
+        setJsonError('Must be a JSON object');
         return false;
       }
       if (!Object.values(parsed).every((value) => typeof value === 'string')) {
-        setJsonError('Header 名和值必须是字符串');
+        setJsonError('Header name and value must be strings');
         return false;
       }
       setJsonError(null);
       return true;
     } catch {
-      setJsonError('无效的 JSON 格式');
+      setJsonError('Invalid JSON format');
       return false;
     }
   };
 
-  // 处理模式切换
+  // Handle mode switch
   const handleModeChange = (newMode: 'custom' | 'claude' | 'codex') => {
     setMode(newMode);
     setExpanded(true);
@@ -91,7 +91,7 @@ const HeaderInjectionControl: React.FC<{
     }
   };
 
-  // 处理文本变化
+  // Handle text change
   const handleTextChange = (text: string) => {
     setJsonText(text);
     if (mode === 'custom') {
@@ -113,7 +113,7 @@ const HeaderInjectionControl: React.FC<{
             expanded && "rotate-90"
           )}
         />
-        Header 注入配置
+        Header injection config
       </button>
       <div className="flex rounded-md overflow-hidden border border-input">
         <Button
@@ -123,7 +123,7 @@ const HeaderInjectionControl: React.FC<{
           onClick={() => handleModeChange('custom')}
           className="flex-1 rounded-none"
         >
-          自定义
+          Custom
         </Button>
         <div className="w-px bg-border" />
         <Button
@@ -163,7 +163,7 @@ const HeaderInjectionControl: React.FC<{
             <div className="text-xs text-destructive">{jsonError}</div>
           )}
           <div className="text-[11px] text-muted-foreground">
-            仅支持静态 JSON 对象，Header 名和值都必须是字符串。
+            Only static JSON objects are supported. Header names and values must be strings.
           </div>
         </>
       )}
@@ -171,7 +171,7 @@ const HeaderInjectionControl: React.FC<{
   );
 };
 
-/** 渠道编辑器对话框组件 */
+/** Channel editor dialog component */
 export const ChannelEditorDialog: React.FC<{
   open: boolean;
   channel: import('../types').Channel | null;
@@ -192,9 +192,9 @@ export const ChannelEditorDialog: React.FC<{
   const [probingUrl, setProbingUrl] = useState(false);
   const [availableProtocols, setAvailableProtocols] = useState<string[]>([]);
   const [showModels, setShowModels] = useState(false);
-  // 时间范围选择：3个月/6个月/12个月
+  // Time range selection: 3/6/12 months
   const [timeRange, setTimeRange] = useState<3 | 6 | 12>(3);
-  // 模型测速状态
+  // Model latency test state
   const [testingModels, setTestingModels] = useState(false);
   const [modelTestResults, setModelTestResults] = useState<Record<string, { success: boolean; latency?: number; reason?: string; statusCode?: number }>>({});
 
@@ -204,7 +204,7 @@ export const ChannelEditorDialog: React.FC<{
   const existingModelsRef = useRef<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
 
-  // 初始化表单数据
+  // Initialize form data
   useEffect(() => {
     if (!open) return;
     setSaving(false);
@@ -213,7 +213,7 @@ export const ChannelEditorDialog: React.FC<{
     setShowApiKey(false);
     setAvailableProtocols([]);
     existingModelsRef.current = new Set();
-    // 模型区默认隐藏逻辑：仅当现有渠道已有模型时才默认展开，否则收起
+    // Default hide model section: only expand by default if channel has models
     const hasModels = !!channel && ((channel.available_models?.length || 0) > 0 || (channel.selected_models?.length || 0) > 0);
     setModelsValidated(!!channel && ((channel.available_models?.length || 0) > 0));
     setShowModels(hasModels);
@@ -234,7 +234,7 @@ export const ChannelEditorDialog: React.FC<{
   const apiKeys = useMemo(() => form.api_key.split('\n').map((key) => key.trim()).filter(Boolean), [form.api_key]);
   const primaryApiKey = apiKeys[0] ?? '';
 
-  // URL 检测
+  // URL detection
   useEffect(() => {
     const seq = ++probeSeqRef.current;
     if (!form.base_url.trim()) {
@@ -278,10 +278,10 @@ export const ChannelEditorDialog: React.FC<{
     return () => clearTimeout(timer);
   }, [api, form.api_type, form.base_url, primaryApiKey, t]);
 
-  // canSave 必须检查 4 项：name, api_type, base_url, api_key 都有内容
+  // canSave must check 4 items: name, api_type, base_url, api_key
   const canSave = !!(form.name.trim() && form.api_type.trim() && form.base_url.trim() && primaryApiKey);
   
-  // canFetchModels: 基础输入满足即可尝试，URL 探测失败不阻塞获取模型
+  // canFetchModels: Attempt if basic inputs are met; URL probe failure doesn't block fetching
   const canFetchModels = !!(form.name.trim() && form.api_type.trim() && form.base_url.trim() && primaryApiKey && !fetchingModels);
 
   const setValue = <K extends keyof ChannelFormState>(key: K, value: ChannelFormState[K]) => {
@@ -331,7 +331,7 @@ export const ChannelEditorDialog: React.FC<{
     };
   }, [api, channel?.id, open]);
 
-  // 自动选择模型：所选时间范围内发布的模型 + 已存在模型 + 当前临时创建模型
+  // Auto select models: models released in selected time range + existing models + temp created models
   const autoSelectModels = useCallback((models: EditorModelInfo[]): string[] => {
     const rangeStart = new Date();
     rangeStart.setMonth(rangeStart.getMonth() - timeRange);
@@ -403,7 +403,7 @@ export const ChannelEditorDialog: React.FC<{
     };
   };
 
-  // 获取模型列表
+  // Fetch model list
   const handleFetchModels = async () => {
     const seq = ++fetchSeqRef.current;
 
@@ -413,7 +413,7 @@ export const ChannelEditorDialog: React.FC<{
       const fetched = await withTimeout(
         fetchModelsByProtocol(form.api_type),
         10_000,
-        t('channel.editor.fetchModelsTimeout', '获取模型超时'),
+        t('channel.editor.fetchModelsTimeout', 'Fetch models timeout'),
       );
       if (fetchSeqRef.current !== seq) return;
 
@@ -428,11 +428,11 @@ export const ChannelEditorDialog: React.FC<{
       setSelectedModels(nextSelected);
 
       if (finalModels.length === 0) {
-        toast.warning(t('channel.editor.noModelsFetched', '未获取到模型'));
+        toast.warning(t('channel.editor.noModelsFetched', 'No models fetched'));
       }
     } catch (err) {
       if (fetchSeqRef.current === seq) {
-        toast.error(getChannelErrorMessage(err, t('channel.editor.fetchModelsFailed', '获取模型列表失败')));
+        toast.error(getChannelErrorMessage(err, t('channel.editor.fetchModelsFailed', 'Failed to fetch model list')));
       }
     } finally {
       if (fetchSeqRef.current === seq) {
@@ -483,7 +483,7 @@ export const ChannelEditorDialog: React.FC<{
       setModelTestResults({
         __limit__: {
           success: false,
-          reason: t('channel.editor.tooManyModels', '模型数量过多（{{count}}个），测速耗时较长，请减少筛选范围', { count: filteredModels.length }),
+          reason: t('channel.editor.tooManyModels', 'Too many models ({{count}}). Test will take too long. Please reduce filter range.', { count: filteredModels.length }),
         },
       });
       return;
@@ -516,7 +516,7 @@ export const ChannelEditorDialog: React.FC<{
           }
         })(),
         10_000,
-        t('channel.editor.testModelsTimeout', '模型测速超时'),
+        t('channel.editor.testModelsTimeout', '模型Test timeout'),
       );
     } catch (err) {
       if (testSeqRef.current === seq) {
@@ -549,15 +549,15 @@ export const ChannelEditorDialog: React.FC<{
       try {
         const parsed = JSON.parse(form.upstream_headers);
         if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-          toast.error('Header 注入配置必须是有效的 JSON 对象');
+          toast.error('Header injection config必须是有效的 JSON 对象');
           return;
         }
         if (!Object.values(parsed).every((value) => typeof value === 'string')) {
-          toast.error('Header 名和值必须是字符串');
+          toast.error('Header name and value must be strings');
           return;
         }
       } catch {
-        toast.error('Header 注入配置包含无效的 JSON 格式');
+        toast.error('Header injection config包含Invalid JSON format');
         return;
       }
     }
@@ -596,7 +596,7 @@ export const ChannelEditorDialog: React.FC<{
         } catch (err) {
           failedNames.push(name);
           if (keys.length === 1) throw err;
-          toast.error(`${name}: ${getChannelErrorMessage(err, t('channel.editor.saveFailed', '保存渠道失败'))}`);
+          toast.error(`${name}: ${getChannelErrorMessage(err, t('channel.editor.saveFailed', 'Failed to save channel'))}`);
         }
       }
 
@@ -611,7 +611,7 @@ export const ChannelEditorDialog: React.FC<{
       queryClient.invalidateQueries({ queryKey: ['entries'] });
       onOpenChange(false);
     } catch (err) {
-      toast.error(getChannelErrorMessage(err, t('channel.editor.saveFailed', '保存渠道失败')));
+      toast.error(getChannelErrorMessage(err, t('channel.editor.saveFailed', 'Failed to save channel')));
     } finally {
       setSaving(false);
     }
@@ -715,7 +715,7 @@ return (
               </div>
             </div>
 
-            {/* Header 注入配置 */}
+            {/* Header injection config */}
             <HeaderInjectionControl
               value={form.upstream_headers}
               onChange={(value) => setValue('upstream_headers', value)}
@@ -746,7 +746,7 @@ return (
           {/* 模型信息区 - 仅在展开时显示 */}
           {showModels && (
             <div className="min-w-0 space-y-3 rounded-md border border-border/60 p-3 sm:p-4">
-              {/* 时间范围选择：3个月/6个月/12个月 */}
+              {/* Time range selection: 3/6/12 months */}
               <div className="flex overflow-hidden rounded-md border border-input">
                 {([3, 6, 12] as const).map((months) => (
                   <Button
@@ -756,7 +756,7 @@ return (
                     onClick={() => setTimeRange(months)}
                     className="flex-1 rounded-none border-0 border-r last:border-r-0"
                   >
-                    {t('channel.editor.months', { count: months, defaultValue: `${months}个月` })}
+                    {t('channel.editor.months', { count: months, defaultValue: `${months} months` })}
                   </Button>
                 ))}
               </div>
@@ -765,16 +765,16 @@ return (
               <div className="flex flex-wrap gap-2 items-center">
                 <Input 
                   id="model-search" 
-                  placeholder={t('channel.editor.searchPlaceholder', '搜索/创建模型')} 
+                  placeholder={t('channel.editor.searchPlaceholder', 'Search/Create model')} 
                   value={modelSearch} 
                   onChange={(e) => setModelSearch(e.target.value)} 
                   className="h-8 min-w-full flex-1 text-sm sm:min-w-48"
                 />
-                <Button size="sm" variant="outline" onClick={selectAllFiltered}>{t('common.selectAll', '全选')}</Button>
+                <Button size="sm" variant="outline" onClick={selectAllFiltered}>{t('common.selectAll', 'Select All')}</Button>
                 <Button size="sm" variant="outline" onClick={clearAllSelected}>{t('common.clear', '清除')}</Button>
               </div>
 
-              {/* 模型列表 */}
+              {/* Model list */}
               <div className="max-h-[42dvh] min-h-48 overflow-y-auto rounded-md border border-border bg-background pr-2 sm:h-[262px] sm:max-h-none">
                 {filteredModels.map((model) => {
                   const testResult = modelTestResults[model.name];
@@ -806,7 +806,7 @@ return (
                     className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent"
                     onClick={createTemporaryModel}
                   >
-                    <span>{t('channel.editor.createModel', { name: modelSearch.trim(), defaultValue: `创建模型「${modelSearch.trim()}」` })}</span>
+                    <span>{t('channel.editor.createModel', { name: modelSearch.trim(), defaultValue: `Create model "${modelSearch.trim()}"` })}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{form.api_type}</span>
                   </button>
                 ) : null}
@@ -827,7 +827,7 @@ return (
                 </div>
               )}
 
-              {/* 模型测速按钮 - fill 宽度 */}
+              {/* Test Models按钮 - fill 宽度 */}
               <Button 
                 className="w-full gap-1.5" 
                 variant="outline"
@@ -836,8 +836,8 @@ return (
               >
                 <Zap className={cn('h-4 w-4', testingModels && 'animate-pulse')} />
                 {testingModels 
-                  ? t('channel.editor.testingModels', '测速中...') 
-                  : t('channel.editor.testModels', '模型测速')
+                  ? t('channel.editor.testingModels', 'Testing...') 
+                  : t('channel.editor.testModels', 'Test Models')
                 }
                 {filteredModels.length > 0 && !testingModels && (
                   <span className="text-xs text-muted-foreground ml-1">

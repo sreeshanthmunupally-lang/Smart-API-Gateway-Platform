@@ -48,7 +48,7 @@ function createAdminHttpError(
   instance.status = status;
   instance.code = bodyError?.code;
   instance.retryAfterSeconds = bodyError?.retry_after_seconds;
-  // 优先读取后端嵌套字段，兼容历史顶层字段
+  // Prefer nested backend field; fall back to legacy top-level field for compatibility
   instance.remainingAttempts = bodyError?.details?.remaining_attempts ?? bodyError?.remaining_attempts;
   instance.isNetworkError = status === 0 || bodyError?.code === "ENDPOINT_UNREACHABLE";
   instance.isAuthError = status === 401 || status === 403
@@ -135,7 +135,7 @@ export async function validateToken(): Promise<TokenValidationResult> {
     if (response.status === 401) return { status: "invalid", reason: "unauthorized" };
     if (response.status === 403) return { status: "invalid", reason: "forbidden" };
 
-    return { status: "error", message: `Web Admin 状态校验失败：HTTP ${response.status}` };
+    return { status: "error", message: `Web Admin status check failed: HTTP ${response.status}` };
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : String(cause);
     return { status: "unreachable", message };

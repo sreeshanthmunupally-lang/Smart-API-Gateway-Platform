@@ -233,11 +233,11 @@ export function getCatalogModel(modelId: string): CatalogModel | null {
   const key = modelId.trim().toLowerCase();
   if (!key) return null;
 
-  // 直接查 modelIndex（O(1)），命中则返回
+  // Direct lookup via modelIndex (O(1)), return if found
   const direct = modelIndex.get(key);
   if (direct) return direct;
 
-  // 未命中，遍历 modelEntries 做模糊匹配（慢路径）
+  // If not found, iterate over modelEntries for fuzzy match (slow path)
   let best: { score: number; model: CatalogModel } | null = null;
   for (const variant of buildKeyVariants(key)) {
     const directVariant = modelIndex.get(variant);

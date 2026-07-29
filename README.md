@@ -1,6 +1,5 @@
-# API Switch
+# Smart API Gateway Platform
 
-[English README](README.md) | [中文 README](README_CN.md)
 
 ---
 
@@ -232,8 +231,7 @@ pnpm android:build
 
 ## Documentation
 
-- [English Guide](GUIDE.md)
-- [中文使用指南](GUIDE_CN.md)
+- [Usage Guide](GUIDE.md)
 - [Technical Whitepaper](WHITEPAPER.md)
 
 ---
@@ -244,10 +242,4 @@ API Switch is actively evolving for personal local use. Planned work includes a 
 
 ---
 
-If API Switch helps you, consider giving it a Star on [GitHub](https://github.com/wang1970/API-Switch).
-
-## 💬 Community
-
-Join our WeChat group:
-
-<img src="wx1.jpg" alt="WeChat Group" width="240">
+If Smart API Gateway Platform helps you, consider giving it a Star on [GitHub](https://github.com/pythonistsawlani/Smart-API-Gateway-Platform).

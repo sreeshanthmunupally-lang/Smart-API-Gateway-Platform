@@ -303,8 +303,8 @@ jobs:
           - `api-switch-macos-arm64` — macOS Apple Silicon
           - `api-switch-linux-x64` — Linux x64
           - `api-switch-linux-arm64` — Linux ARM64
-          - `api-switch-linux-x64-headless` — Linux x64 (无 GUI，体积更小，适合服务器/Termux)
-          - `api-switch-linux-arm64-headless` — Linux ARM64 (无 GUI，适合服务器/Termux)
+          - `api-switch-linux-x64-headless` — Linux x64 (no GUI, smaller binary, suitable for servers/Termux)
+          - `api-switch-linux-arm64-headless` — Linux ARM64 (no GUI, suitable for servers/Termux)
           - `api-switch-android-universal-apk` — Android universal APK
 
           **Installers** (system integration):

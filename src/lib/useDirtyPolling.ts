@@ -11,10 +11,12 @@ const DEFAULT_DIRTY_QUERY_KEYS: Record<'log' | 'pool' | 'channel' | 'token', rea
 
 /**
  * useDirtyPolling Hook
- * - 每 2 秒调用 `apiAdapter.dirty.take(module)` 检测脏标记。
- * - 当返回 true 时，使用 React Query 的 `queryClient.invalidateQueries` 刷新对应模块的查询。
- * - module 参数对应后端模块标识，可为 'log' | 'pool' | 'channel' | 'token'。
- * - queryKeys 可选：指定需要刷新的 query key 列表。
+ * - Calls `apiAdapter.dirty.take(module)` every 2 seconds to detect dirty flags.
+ * - When it returns true, uses React Query's `queryClient.invalidateQueries` to
+ *   refresh the corresponding module's queries.
+ * - The module param corresponds to a backend module identifier:
+ *   'log' | 'pool' | 'channel' | 'token'.
+ * - queryKeys (optional): specify a list of query keys to refresh.
  */
 export function useDirtyPolling(
   module: 'log' | 'pool' | 'channel' | 'token',
@@ -37,7 +39,7 @@ export function useDirtyPolling(
           requestAnimationFrame(() => window.scrollTo(0, scrollY));
         }
       } catch (e) {
-        console.error('脏标记轮询失败:', e);
+        console.error('Dirty flag poll failed:', e);
       } finally {
         if (!cancelled) {
           setTimeout(poll, 2000);

@@ -3,8 +3,8 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
-// 注意：ErrorBoundary 是类组件，不能在类内部使用 Hook
-// 但 ErrorFallback 函数组件已经使用 useTranslation
+// comment
+// comment
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -41,7 +41,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         return this.props.fallback;
       }
 
-      // 使用 ErrorFallback 组件统一使用 i18n
+      // comment
       return <ErrorFallback error={this.state.error} resetErrorBoundary={this.handleTryAgain} />;
     }
 

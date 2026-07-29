@@ -338,9 +338,9 @@ export function SettingsEditor({
               min={30}
               max={1800}
               step={30}
-              value={s.circuit_recovery_secs}
+              value={[s.circuit_recovery_secs]}
               onValueChange={(value) =>
-                onChange("circuit_recovery_secs", value)
+                onChange("circuit_recovery_secs", value[0])
               }
             />
             <p className="text-xs text-muted-foreground">30s – 1800s</p>
@@ -420,7 +420,7 @@ export function SettingsEditor({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="zh">中文</SelectItem>
+                <SelectItem value="zh">Chinese</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>

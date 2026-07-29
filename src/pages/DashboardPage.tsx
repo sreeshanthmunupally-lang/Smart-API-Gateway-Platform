@@ -119,9 +119,9 @@ export function DashboardPage() {
     return {};
   }, [chartRange]);
 
-  // 根据时间跨度自动计算 granularity
+  // Automatically calculate granularity based on time span
   const autoGranularity = useMemo<"hour" | "day">(() => {
-    // 没有时间范围 = "查全部数据"，默认 day
+    // No time range = "query all data", default to day
     if (chartRangeFilter.start_time === undefined && chartRangeFilter.end_time === undefined) {
       return "day";
     }
@@ -132,7 +132,7 @@ export function DashboardPage() {
     return spanDays > 7 ? "day" : "hour";
   }, [chartRangeFilter.start_time, chartRangeFilter.end_time]);
 
-  // 用户手动选择优先，否则自动
+  // User manual selection takes precedence, otherwise automatic
   const effectiveGranularity = manualGranularity ?? autoGranularity;
 
   const effectiveFilter = useMemo(() => ({

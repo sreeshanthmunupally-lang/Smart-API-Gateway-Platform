@@ -1,6 +1,6 @@
 /**
- * 渠道编辑器模块
- * 独立抽离的渠道创建和编辑功能
+ * Channel Editor module
+ * Extracted channel create/edit functionality
  */
 
 export { ChannelEditorDialog } from './ChannelEditorDialog';

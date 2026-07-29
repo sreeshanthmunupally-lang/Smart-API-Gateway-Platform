@@ -1,7 +1,7 @@
-﻿// Channel Editor 缁勪欢鍐呴儴绫诲瀷鍜屽父閲忓畾涔?
+// Channel Editor internal types and constants
 import type { Channel, ModelCatalogMetaUpdate } from '../types';
 
-/** 琛ㄥ崟鐘舵€?*/
+/** Form state */
 export interface ChannelFormState {
   id?: string;
   name: string;
@@ -13,7 +13,7 @@ export interface ChannelFormState {
   upstream_headers: string;
 }
 
-/** URL Probe 鎺㈡祴缁撴灉 */
+/** URL Probe result */
 export interface UrlProbeResult {
   reachable: boolean;
   latency_ms: number;
@@ -24,7 +24,7 @@ export interface UrlProbeResult {
   message: string;
 }
 
-/** 榛樿琛ㄥ崟鍊?*/
+/** Default form values */
 export const DEFAULT_FORM: ChannelFormState = {
   name: '',
     api_type: 'openai',
@@ -35,7 +35,7 @@ export const DEFAULT_FORM: ChannelFormState = {
   upstream_headers: '',
 };
 
-/** API 绫诲瀷鍒楄〃 */
+/** API type list */
 export const API_TYPES = [
   { value: 'openai', label: 'OpenAI-compatible' },
   { value: 'responses', label: 'OpenAI-Responses' },

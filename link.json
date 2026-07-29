@@ -1,8 +1,8 @@
 [
   {
     "id": "opencode",
-    "name": "OpenCode CLI APP",
-    "description": "自动配置 OpenCode CLI APP 连接到本地代理",
+    "name": "OpenCode CLI",
+    "description": "Automatically configure OpenCode CLI to connect to the local proxy",
     "icon": "ExternalLink",
     "configMode": "write",
     "config": {
@@ -12,8 +12,8 @@
   },
   {
     "id": "codex",
-    "name": "Codex CLI APP",
-    "description": "自动配置 Codex CLI APP 连接到本地代理",
+    "name": "Codex CLI",
+    "description": "Automatically configure Codex CLI to connect to the local proxy",
     "icon": "Terminal",
     "configMode": "write",
     "config": {
@@ -24,7 +24,7 @@
   {
     "id": "claude-code",
     "name": "Claude Code",
-    "description": "自动配置 Claude Code 连接到本地代理",
+    "description": "Automatically configure Claude Code to connect to the local proxy",
     "icon": "MessageSquare",
     "configMode": "write",
     "config": {
@@ -34,8 +34,8 @@
   },
   {
     "id": "zed",
-    "name": "Zed APP",
-    "description": "自动配置 Zed APP 连接到本地代理",
+    "name": "Zed Editor",
+    "description": "Automatically configure Zed Editor to connect to the local proxy",
     "icon": "ExternalLink",
     "configMode": "write",
     "config": {

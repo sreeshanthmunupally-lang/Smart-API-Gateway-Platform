@@ -55,8 +55,10 @@ function isTauriRuntime(): boolean {
  * Call a Tauri command via IPC. Dynamic import ensures the
  * @tauri-apps/api/core module is never bundled in web builds.
  *
- * 后端 AppError 序列化为字符串后随 invoke reject 传递（结构化 code 已在传递链中丢失），
- * 此处基于 message 文本做兜底分类，让前端 `getChannelErrorMessage` 能按 kind 输出精确提示。
+ * The backend AppError is serialized as a string when passed through invoke reject
+ * (the structured code is lost in transit). Here we do a fallback classification
+ * based on the message text so the frontend `getChannelErrorMessage` can output
+ * a precise hint by kind.
  */
 async function tauriCmd<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   const { invoke } = await import('@tauri-apps/api/core');
@@ -71,21 +73,22 @@ async function tauriCmd<T>(cmd: string, args?: Record<string, unknown>): Promise
 }
 
 /**
- * 基于错误文本兜底分类 invoke reject message。
- * 后端 fetch_models 路径产生的 message 形如：
+ * Classify an invoke reject message by text as a fallback.
+ * Messages from the backend fetch_models path look like:
  *   "Network error: Invalid credentials: HTTP 401"
  *   "Network error: Endpoint unreachable: ..."
  *   "Network error: Endpoint timeout: ..."
  *   "Network error: Rate limited: HTTP 429"
  *   "Network error: Provider returned unsupported response: HTTP 500"
  *
- * 实现要点：先剥掉 AppError 包装层（"Network error: " / "Database error: " 等），
- * 再对内层 message 做精确匹配，避免被包装前缀里的 "network" 误判。
+ * Implementation note: first strip the AppError wrapper prefix
+ * ("Network error: " / "Database error: " etc.), then do exact
+ * matching on the inner message to avoid false positives.
  */
 function classifyTauriErrorMessage(raw: string): string {
   const stripped = raw.replace(/^(?:Database|Network|Not found|Validation|Proxy|Internal) error: /i, '');
   const m = stripped.toLowerCase();
-  // 鉴权失败：必须先判断（401/403 文本里可能含 "connection"）
+  // Auth failure: must be checked first (401/403 text may contain "connection")
   if (m.includes('invalid credentials') || /\bhttp\s*(401|403)\b/.test(m) || m.includes('unauthorized') || m.includes('forbidden')) {
     return 'INVALID_CREDENTIALS';
   }
@@ -249,7 +252,7 @@ function useTauri(): boolean {
 }
 
 // ============================================================
-// Unified adapter 鈥?single source of truth for every endpoint
+// Unified adapter – single source of truth for every endpoint
 // ============================================================
 
 export const apiAdapter: ApiAdapter = {
@@ -535,22 +538,22 @@ export const apiAdapter: ApiAdapter = {
       if (useTauri()) {
         await tauriCmd<void>('update_settings', { settings });
       } else {
-        // Web锛歅UT 鍓嶅厛鑾峰彇鏈€鏂扮増鏈彿锛涚増鏈啿绐佹椂鑷姩閲嶈瘯锛堟渶澶?3 娆★級
+        // Web: before PUT, fetch the latest version; auto-retry on version conflict (max 3 attempts)
         for (let attempt = 0; attempt < 3; attempt++) {
           const latest = await webRequest<{ data: AppSettings; _version: number }>('GET', '/settings');
           try {
-            // PUT 杩斿洖 RestartResponse { _version, ... }
+            // PUT returns RestartResponse { _version, ... }
             const result = await webRequest<{ _version: number }>('PUT', '/settings', {
               data: settings,
               _version: latest._version,
             });
-            lastSettingsVersion = result._version; // PUT 鎴愬姛鍚庢洿鏂扮増鏈彿
+            lastSettingsVersion = result._version; // update version after successful PUT
             return;
           } catch (err: unknown) {
             const httpErr = err as ChannelOperationHttpError;
-            // 鐗堟湰鍐茬獊锛圚TTP 409锛夛細閲嶈瘯鑾峰彇鏈€鏂扮増鏈?
+            // Version conflict (HTTP 409): retry with latest version
             if (httpErr?.status === 409 && attempt < 2) continue;
-            throw err; // 鍏朵粬閿欒鎴栭噸璇曡€楀敖鍒欐姏鍑?
+            throw err; // other error or retries exhausted — rethrow
           }
         }
       }
@@ -589,7 +592,7 @@ export const apiAdapter: ApiAdapter = {
       : webRequest<TestChatResponse>('POST', '/test-chat', { entry_id: entryId, messages }),
 
   dirty: {
-    /** 脏标记轮询：拉取模块版本号，比对上次值，变化则返回 true */
+    /** Dirty flag polling: pull module version, compare with last value, return true if changed */
     take: async (module: 'log' | 'pool' | 'channel' | 'token') => {
       let version: number;
       if (useTauri()) {

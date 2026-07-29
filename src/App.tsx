@@ -24,7 +24,7 @@ type WebAuthViewState =
   | { state: "server_unreachable"; message: string }
   | { state: "expired"; message: string };
 
-const GUIDE_BASE = "https://github.com/wang1970/API-Switch/blob/master/";
+const GUIDE_BASE = "https://github.com/pythonistsawlani/Smart-API-Gateway-Platform/blob/main/";
 
 function MainApp({ onLogout }: { onLogout?: () => void }) {
   const { i18n } = useTranslation();
@@ -55,8 +55,8 @@ function MainApp({ onLogout }: { onLogout?: () => void }) {
     staleTime: Infinity,
   });
 
-  // 状态版本检测：组件挂载时检测一次，不轮询
-  // 数据看板等页面不再 2 秒自动刷新，进去有一次数据即可
+  // State version check: check once on mount, no polling
+  // Dashboard and other pages no longer auto-refresh every 2 seconds, having data once is enough
   const queryClient = useQueryClient();
   const lastVersion = useRef<Record<string, number> | null>(null);
   useQuery({
@@ -188,13 +188,13 @@ export default function App() {
       }
 
       if (result.status === "unreachable") {
-        setWebAuth({ state: "server_unreachable", message: "无法连接 Web Admin 服务，请确认服务正在运行。" });
+        setWebAuth({ state: "server_unreachable", message: "Cannot connect to Web Admin service. Please ensure the service is running." });
         return;
       }
 
       clearToken();
       if (result.status === "invalid") {
-        setWebAuth({ state: "expired", message: "登录已过期，请重新登录。" });
+        setWebAuth({ state: "expired", message: "Session expired. Please log in again." });
       } else {
         setWebAuth({ state: "login", message: result.message });
       }
@@ -206,9 +206,9 @@ export default function App() {
     invalidateWebTokenCheck();
     clearToken();
     setWebAuth({ state: "login" });
-    toast.success("已退出登录");
+    toast.success("Logged out successfully");
 
-    // fire-and-forget，不等后端响应
+    // fire-and-forget, do not wait for backend response
     if (token) {
       fetch("/admin/logout", {
         method: "POST",
@@ -228,12 +228,12 @@ export default function App() {
     if (isDesktop) return;
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<AuthExpiredDetail>).detail;
-      // 仅在当前仍处于认证或校验中时处理，避免重复状态抖动。
+      // Only process when currently authenticated or checking, avoid redundant state flapping.
       if (webAuth.state !== "authenticated" && webAuth.state !== "checking") return;
       invalidateWebTokenCheck();
       clearToken();
-      setWebAuth({ state: "expired", message: detail?.message || "登录已过期，请重新登录。" });
-      toast.error("登录已过期，请重新登录", { id: "web-admin-auth-expired" });
+      setWebAuth({ state: "expired", message: detail?.message || "Session expired. Please log in again." });
+      toast.error("Session expired, please log in again", { id: "web-admin-auth-expired" });
     };
     window.addEventListener(AUTH_EXPIRED_EVENT, handler);
     return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handler);
@@ -245,14 +245,14 @@ export default function App() {
       if (event.key !== TOKEN_KEY) return;
       if (!event.newValue) {
         invalidateWebTokenCheck();
-        // 仅在当前已认证时切换状态，避免覆盖有效状态流转
+        // Only switch state if currently authenticated, to avoid overriding valid state flow
         if (webAuth.state === "authenticated") {
-          setWebAuth({ state: "login", message: "已在其他页面退出登录。" });
-          toast.info("已在其他页面退出登录", { id: "web-admin-storage-logout" });
+          setWebAuth({ state: "login", message: "You have been logged out from another tab." });
+          toast.info("Logged out from another tab", { id: "web-admin-storage-logout" });
         }
         return;
       }
-      // token 被替换：重新校验以同步其他标签页的登录状态
+      // token replaced: re-validate to sync login state from other tabs
       if (webAuth.state !== "checking") {
         checkWebToken();
       }

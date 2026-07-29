@@ -167,9 +167,9 @@ export function TestChatDialog({ open, onOpenChange, entry }: TestChatDialogProp
                     {msg.content}
                     {msg.role === "assistant" && msg.connect_ms != null && (
                       <div className="mt-1 pt-1 border-t border-border text-[10px] text-muted-foreground">
-                        <span title="连接时间 (TTFB)">🔗 {formatMs(msg.connect_ms)}</span>
+                        <span title="Connection Time (TTFB)">🔗 {formatMs(msg.connect_ms)}</span>
                         <span className="mx-1.5">+</span>
-                        <span title="思考/生成时间">💭 {formatMs(msg.think_ms || 0)}</span>
+                        <span title="Thinking/Generation Time">💭 {formatMs(msg.think_ms || 0)}</span>
                         {msg.usage && (
                           <span className="ml-2">
                             IN:{msg.usage.prompt_tokens}+OUT:{msg.usage.completion_tokens}

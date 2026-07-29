@@ -8,6 +8,9 @@ export default defineConfig({
   base: "/",
   publicDir: path.resolve(__dirname, "public"),
   plugins: [react(), tailwindcss()],
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || "0.8.42"),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
@@ -26,6 +29,14 @@ export default defineConfig({
         entryFileNames: "assets/[name]-[hash].js",
         chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name]-[hash].[ext]",
+      },
+    },
+  },
+  server: {
+    proxy: {
+      "/admin": {
+        target: "http://127.0.0.1:9099",
+        changeOrigin: true,
       },
     },
   },

@@ -2,7 +2,7 @@ import type { ModelCatalogMetaUpdate } from '../types';
 
 import { getCatalogProviderLogo, getCatalogModel, formatTokenCount } from '@/lib/modelsCatalog';
 
-/** 格式化发布日期 */
+/** Format release date for display */
 export function formatReleaseDate(value?: string): string {
   if (!value) return '';
   const compact = value.match(/^(\d{4})(\d{2})(\d{2})$/);
@@ -12,7 +12,7 @@ export function formatReleaseDate(value?: string): string {
   return value;
 }
 
-/** 构建条目目录元数据 */
+/** Build catalog metadata for an API pool entry */
 export function buildEntryCatalogMeta(modelName: string): ModelCatalogMetaUpdate {
   const model = getCatalogModel(modelName);
   if (!model) {
@@ -43,19 +43,6 @@ export function buildEntryCatalogMeta(modelName: string): ModelCatalogMetaUpdate
   const releaseDate = formatReleaseDate(model.release_date);
   const context = formatTokenCount(model.limit?.context) || '';
   const output = formatTokenCount(model.limit?.output) || '';
-  const zhFeatureLabels: Record<string, string> = {
-    imageGeneration: '生图',
-    imageUnderstanding: '识图',
-    audio: '音频',
-    video: '视频',
-    pdf: 'PDF',
-    reasoning: '推理',
-    interleaved: '思维链',
-    toolCall: '工具调用',
-    structuredOutput: '结构输出',
-    attachment: '附件',
-    temperature: '温度',
-  };
   const enFeatureLabels: Record<string, string> = {
     imageGeneration: 'Image Gen',
     imageUnderstanding: 'Vision',
@@ -80,7 +67,7 @@ export function buildEntryCatalogMeta(modelName: string): ModelCatalogMetaUpdate
     model: modelName,
     provider_logo: getCatalogProviderLogo(modelName),
     release_date: releaseDate,
-    model_meta_zh: buildMeta(zhFeatureLabels, '发布', '上下文', '输出'),
+    model_meta_zh: buildMeta(enFeatureLabels, 'Released', 'Context', 'Output'),
     model_meta_en: buildMeta(enFeatureLabels, 'Release', 'Context', 'Output'),
   };
 }

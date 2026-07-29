@@ -164,17 +164,17 @@ type CatalogDisplayMeta = {
 };
 
 const zhFeatureLabels: Record<string, string> = {
-  imageGeneration: "生图",
-  imageUnderstanding: "识图",
-  audio: "音频",
-  video: "视频",
+  imageGeneration: "Image Gen",
+  imageUnderstanding: "Vision",
+  audio: "Audio",
+  video: "Video",
   pdf: "PDF",
-  reasoning: "推理",
-  interleaved: "思维链",
-  toolCall: "工具调用",
-  structuredOutput: "结构输出",
-  attachment: "附件",
-  temperature: "温度",
+  reasoning: "Reasoning",
+  interleaved: "Reasoning Trace",
+  toolCall: "Tool Calling",
+  structuredOutput: "Struct Output",
+  attachment: "Attachment",
+  temperature: "Temperature",
 };
 const enFeatureLabels: Record<string, string> = {
   imageGeneration: "Image Gen",
@@ -240,7 +240,7 @@ function buildCatalogDisplayMeta(modelId: string): CatalogDisplayMeta {
     context,
     output,
     features,
-    modelMetaZh: buildMeta(zhFeatureLabels, "发布", "上下文", "输出"),
+    modelMetaZh: buildMeta(zhFeatureLabels, "Released", "Context", "Output"),
     modelMetaEn: buildMeta(enFeatureLabels, "Release", "Context", "Output"),
   };
 }
@@ -690,13 +690,13 @@ export function PoolManager() {
 
   useDirtyPolling('pool', dirtyQueryKeys);
 
-  // 搜索输入 300ms 防抖，避免每次按键都触发后端请求
+  // 300ms debounce on search input to prevent firing backend requests on every keystroke
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedFilter(filterText), 300);
     return () => clearTimeout(timer);
   }, [filterText]);
 
-  // 无限滚动分页加载 entries
+  // Infinite scroll pagination for entries
   const {
     data: entriesPages,
     fetchNextPage,
@@ -722,7 +722,7 @@ export function PoolManager() {
 
   const { data: channels, isLoading: channelsLoading } = useQuery({ queryKey: ["channels", "all"], queryFn: () => adapter.channels.list() as Promise<Channel[]>, staleTime: 2000 });
 
-  // 分组列表从轻量接口单独拉取
+  // Group list is fetched separately from a lightweight endpoint
   const { data: groupList } = useQuery({
     queryKey: ["groups"],
     queryFn: () => adapter.pool.getGroups() as Promise<string[]>,
@@ -737,10 +737,10 @@ export function PoolManager() {
     });
   }, [groupList]);
 
-  // 所有已加载的 entries 拍平
+  // Flatten all loaded entries
   const entries = useMemo(() => entriesPages?.pages.flatMap((p) => p.items) ?? [], [entriesPages]);
 
-  // 无限滚动：IntersectionObserver 触发加载更多
+  // Infinite scroll: IntersectionObserver triggers loading more
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
@@ -753,7 +753,7 @@ export function PoolManager() {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // 过滤条件变化时清除本地排序
+  // Clear local order when filters change
   useEffect(() => {
     setLocalOrder(null);
   }, [groupFilter, debouncedFilter, filterChannel]);
@@ -791,10 +791,10 @@ export function PoolManager() {
       return [...ordered, ...missing];
     }, [localOrder, sorted]);
 
-  // 过滤条件已进入 queryKey 并由后端分页接口处理，这里只消费当前页结果
+  // Filter conditions are in queryKey and handled by backend pagination; we only consume current page results here
   const filteredEntries = useMemo(() => displayEntries, [displayEntries]);
-  // 全局排序不依赖于分组/渠道筛选；仅在搜索时不可用
-  const canReorder = true; // 允许在搜索过滤状态下拖动排序模型条目
+  // Global sorting does not depend on group/channel filters; only disabled during search
+  const canReorder = true; // Allow drag-and-drop reordering of model entries even with search filter active
 
   const reorderMutation = useMutation({
     mutationFn: (orderedIds: string[]) => adapter.pool.reorder(orderedIds),
@@ -822,7 +822,7 @@ export function PoolManager() {
       setDeleteDialog(null);
     },
     onError: (err, id) => {
-      toast.error(`删除渠道失败: ${err instanceof Error ? err.message : String(err)}`, { id: `delete-channel-${id}` });
+      toast.error(`Failed to delete channel: ${err instanceof Error ? err.message : String(err)}`, { id: `delete-channel-${id}` });
     },
   });
 
@@ -843,7 +843,7 @@ const handleGroupChange = useCallback((entry: ApiEntry, group: string) => {
   const openChannelEditor = useCallback((entry: ApiEntry) => {
     const channel = channels?.find((c) => c.id === entry.channel_id);
     if (!channel) {
-      toast.error(`找不到渠道：${entry.channel_id}`);
+      toast.error(`Channel not found: ${entry.channel_id}`);
       return;
     }
     setEditingChannel(channel);
@@ -944,7 +944,7 @@ const handleToggleIntent = useCallback(async (entry: ApiEntry, enabled: boolean,
             results[entry.id] = result.latency_ms.toString();
           } else {
             results[entry.id] = "X";
-            // 保存错误详情供前端展示
+            // Save error details for frontend display
             if (result.error_detail) {
               errorDetails[entry.id] = result.error_detail;
             }
@@ -1038,7 +1038,7 @@ const handleToggleIntent = useCallback(async (entry: ApiEntry, enabled: boolean,
                       const meta = getEntryDisplayMeta(entry, catalogMap);
                       return <SortablePoolEntryCard key={entry.id} entry={entry} onTest={setTestEntry} onDelete={(entry, opts) => { setDeleteDialog({ entry, channelMode: !!opts?.shiftKey }); }} onToggleIntent={handleToggleIntent} onGroupChange={handleGroupChange} onEditChannel={openChannelEditor} onEditAlias={setEditAliasEntry} groups={groups} testingEntryIds={testingEntryIds} testResult={testResults[entry.id]} testErrorDetail={testErrorDetails[entry.id]} catalogLogo={meta.logo} catalogReleaseDate={meta.releaseDate} catalogContext={meta.context} catalogOutput={meta.output} catalogFeatures={meta.features} modelMetaZh={meta.modelMetaZh} modelMetaEn={meta.modelMetaEn} />;
                     })}
-                    {/* 无限滚动 sentinel */}
+                    {/* Infinite scroll sentinel */}
                     <div ref={sentinelRef} className="h-4" />
                     {isFetchingNextPage && (
                       <div className="flex justify-center py-4 text-sm text-muted-foreground">
@@ -1110,11 +1110,11 @@ const handleToggleIntent = useCallback(async (entry: ApiEntry, enabled: boolean,
         <DialogContent>
           {deleteDialog?.channelMode ? (
             <>
-              <DialogHeader><DialogTitle>删除渠道</DialogTitle></DialogHeader>
-              <p className="text-sm text-muted-foreground">确定要删除渠道「{deleteDialog.entry.channel_name || deleteDialog.entry.channel_id}」及其下所有模型吗？此操作不可撤销。</p>
+              <DialogHeader><DialogTitle>Delete Channel</DialogTitle></DialogHeader>
+              <p className="text-sm text-muted-foreground">Are you sure you want to delete channel "{deleteDialog.entry.channel_name || deleteDialog.entry.channel_id}" and all its models? This action cannot be undone.</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setDeleteDialog(null)}>{t("common.cancel")}</Button>
-                <Button variant="destructive" disabled={deleteChannelMutation.isPending} onClick={() => { if (deleteDialog) deleteChannelMutation.mutate(deleteDialog.entry.channel_id); }}>删除渠道</Button>
+                <Button variant="destructive" disabled={deleteChannelMutation.isPending} onClick={() => { if (deleteDialog) deleteChannelMutation.mutate(deleteDialog.entry.channel_id); }}>Delete Channel</Button>
               </DialogFooter>
             </>
           ) : (

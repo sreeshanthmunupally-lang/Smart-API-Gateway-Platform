@@ -292,7 +292,7 @@ export const DEFAULT_SETTINGS: VersionedAppSettings = {
   web_admin_username: "admin",
   web_admin_password: "admin",
   web_admin_port: 9099,
-  app_version: "0.6.9",
+  app_version: __APP_VERSION__,
   _version: 0,
 };
 
@@ -395,7 +395,7 @@ export interface TranslationRelayPayload {
  * HTTP response shape for translation relay endpoint.
  */
 export interface TranslationRelayResponse {
-  /** 最新结果，没有则为 null */
+  /** Latest result, or null if none */
   latest: TranslationRelayPayload | null;
 }
 

@@ -85,7 +85,7 @@ export const ChannelManager: React.FC = () => {
   const [testResults, setTestResults] = useState<Record<string, string>>({});
   const [deleteTarget, setDeleteTarget] = useState<Channel | null>(null);
 
-  const error = queryError ? getChannelErrorMessage(queryError, t('channel.editor.listLoadFailed', '渠道列表加载失败')) : null;
+  const error = queryError ? getChannelErrorMessage(queryError, t('channel.editor.listLoadFailed', 'Failed to load channel list')) : null;
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export const ChannelManager: React.FC = () => {
       await queryClient.invalidateQueries({ queryKey: ["channels"] });
       setDeleteTarget(null);
     } catch (err) {
-      toast.error(getChannelErrorMessage(err, '删除渠道失败'));
+      toast.error(getChannelErrorMessage(err, 'Failed to delete channel'));
     }
   };
 
@@ -399,7 +399,7 @@ function ChannelMobileCard({
       await onChanged();
     } catch (err) {
       const msg = (err && typeof err === 'object' && 'message' in err) ? String((err as { message: unknown }).message) : String(err);
-      toast.error(msg || t('channel.editor.saveStatusFailed', '保存渠道状态失败'));
+      toast.error(msg || t('channel.editor.saveStatusFailed', 'Failed to save channel status'));
     } finally {
       setSaving(false);
     }
@@ -481,7 +481,7 @@ function ChannelRow({
     } catch (err) {
       const msg = (err && typeof err === 'object' && 'message' in err) ? String((err as {message:unknown}).message) : String(err);
       console.error('[toggleEnabled]', err);
-      toast.error(msg || t('channel.editor.saveStatusFailed', '保存渠道状态失败'));
+      toast.error(msg || t('channel.editor.saveStatusFailed', 'Failed to save channel status'));
     } finally {
       setSaving(false);
     }
@@ -495,7 +495,7 @@ function ChannelRow({
       const result = await api.channels.probeUrl(channel.base_url);
       setProbeResult(`${result.latency_ms}ms`);
     } catch (err) {
-      setRowError(getChannelErrorMessage(err, t('channel.editor.probeFailed', '测速失败')));
+      setRowError(getChannelErrorMessage(err, t('channel.editor.probeFailed', 'Probe failed')));
     } finally {
       setProbing(false);
     }
@@ -508,7 +508,7 @@ function ChannelRow({
       await api.channels.fetchModels(channel.id);
       await onChanged();
     } catch (err) {
-      setRowError(getChannelErrorMessage(err, t('channel.editor.fetchModelsFailed', '获取模型列表失败')));
+      setRowError(getChannelErrorMessage(err, t('channel.editor.fetchModelsFailed', 'Failed to fetch models')));
     } finally {
       setFetching(false);
     }
@@ -521,7 +521,7 @@ function ChannelRow({
       await api.channels.selectModels(channel.id, modelNames, availableModels, []);
       await onChanged();
     } catch (err) {
-      setRowError(getChannelErrorMessage(err, t('channel.editor.syncFailed', '同步 API 池失败')));
+      setRowError(getChannelErrorMessage(err, t('channel.editor.syncFailed', 'Failed to sync API pool')));
     } finally {
       setSaving(false);
     }

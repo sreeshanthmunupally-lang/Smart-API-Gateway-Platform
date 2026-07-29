@@ -74,8 +74,8 @@ settings: {
   getStateVersion(): Promise<{ log: number; pool: number; channel: number; token: number }>;
   dirty: {
     /**
-     * 杞鑴忔爣璁帮紝妯″潡鍙栧€? 'log' | 'pool' | 'channel' | 'token'
-     * 杩斿洖 true 琛ㄧず瀵瑰簲妯″潡鏈夊彉鍔紝闇€瑕佸埛鏂版煡璇?
+     * Dirty flag check. Module can be one of: 'log' | 'pool' | 'channel' | 'token'
+     * Returns true if the corresponding module has changed and a query refresh is required.
      */
     take(module: 'log' | 'pool' | 'channel' | 'token'): Promise<boolean>;
   };

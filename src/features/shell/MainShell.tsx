@@ -20,7 +20,6 @@ const NAV_ITEMS: { key: MainPage; icon: typeof Layers; labelKey: string; android
   { key: 'settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
-const starImageSrc = `${import.meta.env.BASE_URL}star.jpg`;
 
 export interface MainShellProps {
   currentPage: MainPage;
@@ -103,7 +102,7 @@ export function MainShell({
       <Separator className="my-1" />
       <Button variant="ghost" className="w-full justify-start gap-2 px-3" onClick={openGuide}>
         <BookOpen className="h-4 w-4" />
-        {t('nav.guide', '使用指南')}
+        {t('nav.guide', 'Guide')}
       </Button>
       {onLogout && (
         <>
@@ -117,7 +116,7 @@ export function MainShell({
             }}
           >
             <LogOut className="h-4 w-4" />
-            {t('nav.logout', '退出登录')}
+            {t('nav.logout', 'Logout')}
           </Button>
         </>
       )}
@@ -171,14 +170,9 @@ export function MainShell({
           <ScrollArea className="flex-1 px-2 py-2">{navButtons()}</ScrollArea>
 
           <div className="px-2 pb-4">
-            <div className="flex justify-center">
-              <a href="https://github.com/wang1970/API-Switch" target="_blank" rel="noopener noreferrer">
-                <img src={starImageSrc} alt="Star on GitHub" className="cursor-pointer transition-opacity hover:opacity-80" />
-              </a>
-            </div>
             <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
               {statusDots}
-              <span>版本号：{settings?.app_version || '0.0.0'}</span>
+              <span>Version: {settings?.app_version || __APP_VERSION__}</span>
             </div>
           </div>
         </aside>
