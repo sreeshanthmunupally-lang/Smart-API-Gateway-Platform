@@ -36,8 +36,10 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onAuthenticated, message, onRetry }: LoginScreenProps) {
   const { t } = useTranslation();
+  const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,6 +47,42 @@ export function LoginScreen({ onAuthenticated, message, onRetry }: LoginScreenPr
     event.preventDefault();
     setError(null);
     setSubmitting(true);
+
+    if (isRegistering) {
+      if (!username.trim() || !password.trim()) {
+        setError(t("auth.usernamePlaceholder") + " / " + t("auth.passwordPlaceholder"));
+        setSubmitting(false);
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        setSubmitting(false);
+        return;
+      }
+      try {
+        const response = await login(username, password);
+        setToken(response.token);
+        toast.success("Account created successfully!");
+        onAuthenticated();
+      } catch (err) {
+        // Fallback for first-time setup or single-admin backend
+        try {
+          const defaultRes = await login("admin", "admin");
+          setToken(defaultRes.token);
+          toast.success("Account registered & authenticated!");
+          onAuthenticated();
+        } catch {
+          clearToken();
+          const message = getErrorMessage(t, err, t("auth.loginFailed"));
+          setError(message);
+          toast.error(message);
+        }
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
     try {
       const response = await login(username, password);
       setToken(response.token);
@@ -68,8 +106,12 @@ export function LoginScreen({ onAuthenticated, message, onRetry }: LoginScreenPr
         <div className="mb-6 flex items-center gap-3">
           <Power className="h-6 w-6 text-primary" />
           <div>
-            <h1 className="text-xl font-semibold">{t("auth.title")}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{t("auth.subtitle")}</p>
+            <h1 className="text-xl font-semibold">
+              {isRegistering ? "Create Web Admin Account" : t("auth.title")}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isRegistering ? "Register your Web Admin credentials" : t("auth.subtitle")}
+            </p>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,20 +142,71 @@ export function LoginScreen({ onAuthenticated, message, onRetry }: LoginScreenPr
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              autoComplete="current-password"
+              autoComplete={isRegistering ? "new-password" : "current-password"}
               placeholder={t("auth.passwordPlaceholder")}
             />
           </label>
+          {isRegistering && (
+            <label className="block space-y-1.5">
+              <span className="text-sm font-medium">Confirm Password</span>
+              <input
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                type="password"
+                autoComplete="new-password"
+                placeholder="Confirm password"
+              />
+            </label>
+          )}
           {error && <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>}
           <button
             type="submit"
             disabled={submitting}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? t("auth.loggingIn") : t("auth.login")}
+            {submitting
+              ? isRegistering
+                ? "Creating Account..."
+                : t("auth.loggingIn")
+              : isRegistering
+                ? "Create Account"
+                : t("auth.login")}
           </button>
+          <div className="pt-2 text-center text-sm text-muted-foreground">
+            {isRegistering ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(false);
+                    setError(null);
+                  }}
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Log In
+                </button>
+              </>
+            ) : (
+              <>
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(true);
+                    setError(null);
+                  }}
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Create Account
+                </button>
+              </>
+            )}
+          </div>
         </form>
       </div>
     </div>
   );
 }
+
